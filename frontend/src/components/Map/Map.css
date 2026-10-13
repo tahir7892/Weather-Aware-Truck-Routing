@@ -1,0 +1,248 @@
+.trip-map {
+  position: absolute;
+  inset: 0;
+}
+
+.map-canvas {
+  position: absolute;
+  inset: 0;
+}
+
+/* Legend (top right) */
+.legend {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 2;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px 12px;
+  box-shadow: var(--shadow);
+  font-size: 12px;
+}
+
+.legend h3 {
+  margin: 0 0 6px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-2);
+}
+
+.legend ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.legend li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.swatch {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  flex: none;
+}
+
+.legend-lines {
+  border-top: 1px solid var(--line);
+  margin-top: 8px;
+  padding-top: 8px;
+  display: grid;
+  gap: 4px;
+}
+
+.legend-lines div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.line-swatch {
+  width: 18px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--route-other);
+}
+
+.line-swatch.is-selected {
+  background: var(--route-selected);
+}
+
+/* Hint shown before the first trip / when the map fails */
+.map-hint {
+  position: absolute;
+  top: 14px;
+  left: 56px;
+  right: 180px;
+  z-index: 2;
+  max-width: 420px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px 12px;
+  box-shadow: var(--shadow);
+  color: var(--ink-2);
+}
+
+.map-hint.is-error {
+  color: var(--danger);
+  border-color: var(--danger-line);
+}
+
+/* HTML markers */
+.map-chip {
+  font-size: 12px;
+  font-weight: 700;
+  height: 26px;
+  padding: 0 9px;
+  border-radius: 99px;
+  display: grid;
+  place-items: center;
+  white-space: nowrap;
+  background: var(--surface);
+  color: var(--ink);
+  border: 2px solid var(--route-other);
+  cursor: pointer;
+  box-shadow: var(--shadow);
+}
+
+.map-chip.is-selected {
+  background: var(--accent);
+  color: var(--accent-ink);
+  border-color: var(--surface);
+  z-index: 1;
+}
+
+/* MapLibre already positions markers absolutely, which anchors the ::after pointer. */
+.map-chip.is-endpoint {
+  background: var(--ink);
+  color: var(--surface);
+  border-color: var(--surface);
+  cursor: default;
+}
+
+/* Small pointer from the Start / End label down to its exact spot. */
+.map-chip.is-endpoint::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -7px;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: var(--ink);
+  border-bottom: 0;
+}
+
+.truck-marker {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--ink);
+  color: var(--surface);
+  display: grid;
+  place-items: center;
+  border: 3px solid var(--surface);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.truck-marker.is-arrived {
+  background: #1f9d55;
+}
+
+/* Checkpoint popup (above the legend so its close button is never covered) */
+.cp-popup {
+  z-index: 4;
+}
+
+.cp-popup .maplibregl-popup-content {
+  border-radius: 12px;
+  padding: 12px 14px;
+  box-shadow: var(--shadow);
+  font-family: inherit;
+}
+
+.cp-popup .maplibregl-popup-close-button {
+  font-size: 16px;
+  padding: 0 6px;
+}
+
+.cp-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin: 0 14px 8px 0;
+}
+
+.cp-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 12px;
+  color: var(--ink-2);
+  padding: 2px 0;
+}
+
+.cp-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  margin: 8px 0;
+}
+
+.cp-grid div {
+  background: var(--surface-2);
+  border-radius: 8px;
+  padding: 6px 8px;
+}
+
+.cp-grid span {
+  display: block;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.cp-reason {
+  margin: 0;
+  font-size: 12px;
+  color: var(--ink-2);
+}
+
+@media (max-width: 640px) {
+  /* One compact row along the top so the legend covers less of the routes. */
+  .legend {
+    top: 8px;
+    left: 50px;
+    right: 8px;
+    padding: 6px 8px;
+  }
+
+  .legend h3,
+  .legend-lines {
+    display: none;
+  }
+
+  .legend ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px 10px;
+    font-size: 11px;
+  }
+
+  .legend li {
+    gap: 4px;
+  }
+
+  .map-hint {
+    left: 50px;
+    right: 8px;
+  }
+}

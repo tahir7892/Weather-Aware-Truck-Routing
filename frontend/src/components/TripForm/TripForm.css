@@ -1,0 +1,222 @@
+.trip-form .field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 12px;
+  position: relative;
+  min-width: 0;
+}
+
+.trip-form label,
+.trip-form .field-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-2);
+}
+
+.input {
+  width: 100%;
+  height: 40px;
+  padding: 0 12px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.input.has-error {
+  border-color: var(--danger);
+}
+
+.input.has-error:focus {
+  box-shadow: 0 0 0 3px var(--danger-soft);
+}
+
+.input.with-icon {
+  padding-left: 34px;
+}
+
+.field-error {
+  font-size: 12px;
+  color: var(--danger);
+}
+
+.hint {
+  margin: -4px 0 12px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* Origin / destination */
+.places {
+  display: grid;
+  grid-template-columns: 1fr 36px;
+  gap: 8px;
+  align-items: center;
+}
+
+.places-stack {
+  min-width: 0;
+}
+
+.place-input-wrap {
+  position: relative;
+}
+
+.place-pin {
+  position: absolute;
+  left: 11px;
+  top: 12px;
+  color: var(--muted);
+  pointer-events: none;
+}
+
+.place-field.is-confirmed .place-pin {
+  color: var(--accent);
+}
+
+.swap {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  font-size: 16px;
+}
+
+.swap:hover {
+  background: var(--surface-2);
+}
+
+.suggest {
+  position: absolute;
+  top: 66px;
+  left: 0;
+  right: 0;
+  z-index: 10;
+  list-style: none;
+  margin: 0;
+  padding: 4px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+.suggest li {
+  padding: 8px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+}
+
+.suggest li:hover,
+.suggest li.is-active {
+  background: var(--accent-soft);
+}
+
+.suggest .suggest-note {
+  cursor: default;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.suggest .suggest-note:hover {
+  background: none;
+}
+
+.suggest-pin {
+  color: var(--muted);
+  font-size: 9px;
+}
+
+/* Departure / load */
+.row2 {
+  display: grid;
+  grid-template-columns: 1.25fr 1fr;
+  gap: 10px;
+}
+
+.suffix {
+  position: relative;
+}
+
+.suffix .input {
+  padding-right: 34px;
+}
+
+.suffix span {
+  position: absolute;
+  right: 12px;
+  top: 10px;
+  color: var(--muted);
+  pointer-events: none;
+}
+
+/* Interval */
+.segmented {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  background: var(--surface-2);
+  border-radius: 8px;
+  padding: 3px;
+}
+
+.segmented button {
+  border: 0;
+  background: transparent;
+  height: 32px;
+  border-radius: 6px;
+  color: var(--ink-2);
+}
+
+.segmented button[aria-pressed='true'] {
+  background: var(--surface);
+  color: var(--ink);
+  font-weight: 600;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+.primary {
+  width: 100%;
+  height: 44px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-weight: 600;
+  margin-top: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.primary:hover:not(:disabled) {
+  filter: brightness(1.05);
+}
+
+.primary:disabled {
+  opacity: 0.75;
+}
+
+.primary .spinner {
+  border-color: rgba(255, 255, 255, 0.4);
+  border-top-color: #fff;
+}
+
+@media (max-width: 480px) {
+  .row2 {
+    grid-template-columns: 1fr;
+  }
+}

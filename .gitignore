@@ -1,0 +1,25 @@
+# Project-wide ignores. backend/ and frontend/ have their own .gitignore files.
+
+# Secrets anywhere in the repo (only .env.example files are committed)
+.env
+.env.*
+!.env.example
+
+# Local design / scratch files
+scratchpad/
+
+# Claude Code local settings
+.claude/settings.local.json
+
+# Editors and IDEs
+.vscode/
+.idea/
+*.swp
+
+# Logs
+*.log
+
+# Operating system files
+.DS_Store
+Thumbs.db
+desktop.ini

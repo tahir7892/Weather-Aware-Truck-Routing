@@ -22,8 +22,10 @@ db.sqlite3-journal
 staticfiles/
 media/
 
-# Tests and coverage
+# Tests, coverage and linter caches
 .pytest_cache/
+.mypy_cache/
+.ruff_cache/
 .coverage
 .coverage.*
 htmlcov/
