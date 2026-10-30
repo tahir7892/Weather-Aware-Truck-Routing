@@ -35,36 +35,40 @@ export function pointAtMile(line, cumulative, mile) {
 }
 
 /**
- * Where a truck on `route` is at `moment` (a Date), using the checkpoints'
- * mile markers and ETAs. Returns { point: [lat, lon], arrived, started }.
+ * How far along `route` the truck is at `moment` (a Date), using the
+ * checkpoints' mile markers and ETAs. Returns { mile, started, arrived }.
  */
-export function truckPosition(route, moment, cumulative) {
+export function mileAtTime(route, moment) {
   const checkpoints = route.checkpoints
   const time = moment.getTime()
-  const first = new Date(checkpoints[0].eta).getTime()
+  const first = Date.parse(checkpoints[0].eta)
   const lastCheckpoint = checkpoints[checkpoints.length - 1]
-  const last = new Date(lastCheckpoint.eta).getTime()
+  const last = Date.parse(lastCheckpoint.eta)
 
-  let mile
-  if (time <= first) mile = 0
-  else if (time >= last) mile = lastCheckpoint.mile
-  else {
-    let i = 1
-    while (new Date(checkpoints[i].eta).getTime() < time) i += 1
-    const a = checkpoints[i - 1]
-    const b = checkpoints[i]
-    const ta = new Date(a.eta).getTime()
-    const tb = new Date(b.eta).getTime()
-    mile = a.mile + ((b.mile - a.mile) * (time - ta)) / (tb - ta || 1)
-  }
+  if (time <= first) return { mile: 0, started: false, arrived: false }
+  if (time >= last) return { mile: lastCheckpoint.mile, started: true, arrived: true }
 
+  let i = 1
+  while (Date.parse(checkpoints[i].eta) < time) i += 1
+  const a = checkpoints[i - 1]
+  const b = checkpoints[i]
+  const ta = Date.parse(a.eta)
+  const tb = Date.parse(b.eta)
+  return { mile: a.mile + ((b.mile - a.mile) * (time - ta)) / (tb - ta || 1), started: true, arrived: false }
+}
+
+/** Where a truck on `route` is at `moment`. Returns { point: [lat, lon], started, arrived }. */
+export function truckPosition(route, moment, cumulative) {
+  const { mile, started, arrived } = mileAtTime(route, moment)
   // Checkpoint miles follow the full road line; the drawn line is simplified, so scale.
-  const scale = cumulative[cumulative.length - 1] / (lastCheckpoint.mile || 1)
-  return {
-    point: pointAtMile(route.geometry, cumulative, mile * scale),
-    started: time > first,
-    arrived: time >= last,
-  }
+  const lastMile = route.checkpoints[route.checkpoints.length - 1].mile || 1
+  const scale = cumulative[cumulative.length - 1] / lastMile
+  return { point: pointAtMile(route.geometry, cumulative, mile * scale), started, arrived }
+}
+
+/** Moment `hour` hours after an ISO departure time. */
+export function momentAtHour(departureTime, hour) {
+  return new Date(Date.parse(departureTime) + hour * 3600e3)
 }
 
 /** [[west, south], [east, north]] around every point of every line. */

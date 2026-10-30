@@ -1,12 +1,14 @@
 import { Marker } from 'maplibre-gl'
-import { useEffect, useMemo, useRef } from 'react'
+import { useCallback, useEffect, useMemo, useRef } from 'react'
 
 import { formatDuration, formatMiles, formatTime } from '../../utils/format'
 import { haversineMiles, toLngLat } from '../../utils/geo'
+import { prefersReducedMotion } from '../../utils/motion'
 
 const SOURCE = 'routes'
 const CASING = 'routes-casing'
 const LINE = 'routes-line'
+const DRAW_MS = 900
 
 function chip(text, className, title) {
   const el = document.createElement('div')
@@ -50,12 +52,19 @@ function labelPoints(routes) {
 /**
  * Draws the 3 routes (selected one in blue on top, others gray), a label on
  * each route with its letter and drive time, and the start / end markers.
+ * New routes "draw in"; hovering a route (here or on its card) fades the others.
  */
-export default function RouteLayer({ map, trip, selectedRouteId, onSelectRoute }) {
+export default function RouteLayer({ map, trip, selectedRouteId, hoveredRouteId, onSelectRoute, onHoverRoute }) {
   const onSelectRef = useRef(onSelectRoute)
+  const onHoverRef = useRef(onHoverRoute)
+  const selectedRef = useRef(selectedRouteId)
+  const progressRef = useRef(1)
+  const labelsRef = useRef({})
   useEffect(() => {
     onSelectRef.current = onSelectRoute
-  }, [onSelectRoute])
+    onHoverRef.current = onHoverRoute
+    selectedRef.current = selectedRouteId
+  })
 
   // Add the source and layers once.
   useEffect(() => {
@@ -67,7 +76,11 @@ export default function RouteLayer({ map, trip, selectedRouteId, onSelectRoute }
       type: 'line',
       source: SOURCE,
       layout: { 'line-join': 'round', 'line-cap': 'round', 'line-sort-key': selected },
-      paint: { 'line-color': '#ffffff', 'line-width': ['case', ['get', 'selected'], 10, 7] },
+      paint: {
+        'line-color': '#ffffff',
+        'line-width': ['case', ['get', 'selected'], 10, 7],
+        'line-opacity-transition': { duration: 200 },
+      },
     })
     map.addLayer({
       id: LINE,
@@ -82,20 +95,27 @@ export default function RouteLayer({ map, trip, selectedRouteId, onSelectRoute }
           styles.getPropertyValue('--route-other').trim(),
         ],
         'line-width': ['case', ['get', 'selected'], 6, 4],
+        'line-opacity-transition': { duration: 200 },
       },
     })
 
     const handleClick = (event) => onSelectRef.current(event.features[0].properties.id)
-    const pointer = () => (map.getCanvas().style.cursor = 'pointer')
-    const reset = () => (map.getCanvas().style.cursor = '')
+    const handleMove = (event) => {
+      map.getCanvas().style.cursor = 'pointer'
+      onHoverRef.current?.(event.features[0].properties.id)
+    }
+    const handleLeave = () => {
+      map.getCanvas().style.cursor = ''
+      onHoverRef.current?.(null)
+    }
     map.on('click', LINE, handleClick)
-    map.on('mouseenter', LINE, pointer)
-    map.on('mouseleave', LINE, reset)
+    map.on('mousemove', LINE, handleMove)
+    map.on('mouseleave', LINE, handleLeave)
 
     return () => {
       map.off('click', LINE, handleClick)
-      map.off('mouseenter', LINE, pointer)
-      map.off('mouseleave', LINE, reset)
+      map.off('mousemove', LINE, handleMove)
+      map.off('mouseleave', LINE, handleLeave)
       try {
         map.removeLayer(LINE)
         map.removeLayer(CASING)
@@ -106,21 +126,61 @@ export default function RouteLayer({ map, trip, selectedRouteId, onSelectRoute }
     }
   }, [map])
 
-  // Update the lines when the trip or the selected route changes.
-  useEffect(() => {
+  // Draw the lines, each cut to `progressRef` of its length (for the draw-in animation).
+  const draw = useCallback(() => {
+    const fraction = progressRef.current
     map.getSource(SOURCE)?.setData({
       type: 'FeatureCollection',
-      features: trip.routes.map((route) => ({
-        type: 'Feature',
-        properties: { id: route.id, selected: route.id === selectedRouteId },
-        geometry: { type: 'LineString', coordinates: route.geometry.map(toLngLat) },
-      })),
+      features: trip.routes.map((route) => {
+        const count = Math.max(2, Math.ceil(route.geometry.length * fraction))
+        return {
+          type: 'Feature',
+          properties: { id: route.id, selected: route.id === selectedRef.current },
+          geometry: { type: 'LineString', coordinates: route.geometry.slice(0, count).map(toLngLat) },
+        }
+      }),
     })
-  }, [map, trip, selectedRouteId])
+  }, [map, trip])
+
+  // A new trip: animate the lines from start to end.
+  useEffect(() => {
+    if (prefersReducedMotion()) {
+      progressRef.current = 1
+      draw()
+      return undefined
+    }
+    const start = performance.now()
+    let frame
+    const tick = (now) => {
+      const t = Math.min(1, (now - start) / DRAW_MS)
+      progressRef.current = 1 - (1 - t) ** 3
+      draw()
+      if (t < 1) frame = requestAnimationFrame(tick)
+    }
+    progressRef.current = 0
+    frame = requestAnimationFrame(tick)
+    return () => {
+      cancelAnimationFrame(frame)
+      progressRef.current = 1
+    }
+  }, [draw])
+
+  // Selection changed: redraw at the current animation progress.
+  useEffect(() => {
+    draw()
+  }, [draw, selectedRouteId])
+
+  // Hovered route (on the map or its card): fade the other routes.
+  useEffect(() => {
+    if (!map.getLayer(LINE)) return
+    const opacity = hoveredRouteId ? ['case', ['==', ['get', 'id'], hoveredRouteId], 1, 0.25] : 1
+    map.setPaintProperty(LINE, 'line-opacity', opacity)
+    map.setPaintProperty(CASING, 'line-opacity', opacity)
+  }, [map, hoveredRouteId])
 
   const labelSpots = useMemo(() => labelPoints(trip.routes), [trip])
 
-  // Route labels and start / end markers (HTML markers so they stay crisp).
+  // Route labels and start / end markers, created once per trip (HTML markers stay crisp).
   useEffect(() => {
     // Start / End float just above their point so the truck icon can sit on it.
     const endpoint = { anchor: 'bottom', offset: [0, -6] }
@@ -128,21 +188,33 @@ export default function RouteLayer({ map, trip, selectedRouteId, onSelectRoute }
       new Marker({ element: chip('Start', 'is-endpoint', trip.origin.name), ...endpoint }).setLngLat([trip.origin.lon, trip.origin.lat]),
       new Marker({ element: chip('End', 'is-endpoint', trip.destination.name), ...endpoint }).setLngLat([trip.destination.lon, trip.destination.lat]),
     ]
+    const labels = {}
     for (const route of trip.routes) {
       const { summary } = route
       const label = chip(
         `${route.id} · ${formatDuration(summary.duration_minutes)}`,
-        route.id === selectedRouteId ? 'is-selected' : '',
+        'is-route',
         `Route ${route.id}${route.via ? ` via ${route.via}` : ''}: ${formatMiles(summary.distance_miles)}, ` +
           `arrives ${formatTime(summary.arrival_time)}, worst risk ${summary.max_level ?? 'unknown'}`,
       )
       label.setAttribute('role', 'button')
       label.addEventListener('click', () => onSelectRef.current(route.id))
+      label.addEventListener('mouseenter', () => onHoverRef.current?.(route.id))
+      label.addEventListener('mouseleave', () => onHoverRef.current?.(null))
+      labels[route.id] = label
       markers.push(new Marker({ element: label }).setLngLat(toLngLat(labelSpots[route.id])))
     }
+    labelsRef.current = labels
     markers.forEach((marker) => marker.addTo(map))
     return () => markers.forEach((marker) => marker.remove())
-  }, [map, trip, selectedRouteId, labelSpots])
+  }, [map, trip, labelSpots])
+
+  // Highlight the selected route's label.
+  useEffect(() => {
+    for (const [id, label] of Object.entries(labelsRef.current)) {
+      label.classList.toggle('is-selected', id === selectedRouteId)
+    }
+  }, [trip, selectedRouteId])
 
   return null
 }

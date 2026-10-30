@@ -140,17 +140,180 @@
   font-size: 15px;
 }
 
-.riskbar {
+/* Risk ribbon: risk along the route in driving order, on a shared mile scale */
+.ribbon-track {
+  position: relative;
   display: flex;
   gap: 2px;
   height: 10px;
-  border-radius: 4px;
-  overflow: hidden;
 }
 
-.riskbar .seg {
-  flex-basis: 0;
-  min-width: 3px;
+.ribbon-seg {
+  height: 100%;
+  min-width: 2px;
+  cursor: pointer;
+  transition: transform 0.12s ease;
+}
+
+.ribbon-seg:first-child {
+  border-radius: 4px 0 0 4px;
+}
+
+.ribbon-seg:nth-last-child(1 of .ribbon-seg) {
+  border-radius: 0 4px 4px 0;
+}
+
+.ribbon-seg:hover {
+  transform: scaleY(1.7);
+}
+
+.ribbon-truck {
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  width: 3px;
+  margin-left: -1px;
+  border-radius: 2px;
+  background: var(--ink);
+  box-shadow: 0 0 0 1px var(--surface);
+  pointer-events: none;
+  transition: left 0.3s ease;
+}
+
+.ribbon-tip {
+  position: fixed;
+  z-index: 50;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  max-width: 270px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: var(--ink);
+  color: #fff;
+  font-size: 12px;
+  box-shadow: var(--shadow);
+}
+
+.ribbon-tip small {
+  color: #cfcfca;
+}
+
+.ribbon-tip-level {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+}
+
+/* Card hovered from the map (not selected) */
+.route-card.is-hovered {
+  border-color: var(--route-selected);
+}
+
+/* Route profile chart */
+.profile-card .card-title {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.profile-readout {
+  margin: 0 0 6px;
+  min-height: 22px;
+  font-size: 12px;
+  color: var(--ink-2);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+}
+
+.muted-text {
+  color: var(--muted);
+}
+
+.profile-body {
+  width: 100%;
+}
+
+.profile-chart {
+  display: block;
+  overflow: visible;
+}
+
+.profile-title {
+  font-size: 11px;
+  font-weight: 600;
+  fill: var(--ink-2);
+}
+
+.profile-unit {
+  font-weight: 400;
+  fill: var(--muted);
+}
+
+.profile-tick,
+.profile-band {
+  font-size: 10px;
+  fill: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.profile-threshold {
+  stroke: var(--line);
+  stroke-dasharray: 3 3;
+}
+
+.profile-baseline {
+  stroke: var(--line-strong);
+}
+
+.profile-line {
+  fill: none;
+  stroke: var(--ink-2);
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.profile-dot {
+  stroke: var(--surface);
+  stroke-width: 2;
+  transition: r 0.12s ease;
+  pointer-events: none;
+}
+
+.profile-cross {
+  stroke: var(--accent);
+  stroke-width: 1.5;
+}
+
+.profile-truck {
+  stroke: var(--ink);
+  stroke-width: 1.5;
+  stroke-dasharray: 4 3;
+}
+
+/* Entry animations */
+.route-card {
+  animation: rise 0.45s ease both;
+  animation-delay: calc(var(--i, 0) * 80ms);
+}
+
+.recommendation,
+.profile-card,
+.table-card {
+  animation: rise 0.45s ease both;
+}
+
+.profile-card {
+  animation-delay: 0.25s;
+}
+
+.table-card {
+  animation-delay: 0.32s;
 }
 
 .rc-foot {

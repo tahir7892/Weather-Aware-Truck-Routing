@@ -1,22 +1,37 @@
 import { formatDuration, formatMiles, formatNumber, formatTime } from '../../utils/format'
-import { MILES_BY_LEVEL_ORDER, riskByLabel } from '../../utils/risk'
+import AnimatedNumber from '../common/AnimatedNumber'
+import RiskRibbon from './RiskRibbon'
 
-/** One route's summary: distance, drive time, arrival and miles at each risk level. */
-export default function RouteCard({ route, selected, onSelect }) {
+/**
+ * One route's summary: distance, drive time, arrival, risk along the way and
+ * the miles that decide the ranking. Hovering the card highlights the route
+ * on the map; clicking selects it everywhere.
+ */
+export default function RouteCard({
+  route,
+  index,
+  selected,
+  hovered,
+  maxMiles,
+  truckMile,
+  onSelect,
+  onHover,
+  onHoverPoint,
+  onShowCheckpoint,
+}) {
   const { summary } = route
-  const segments = MILES_BY_LEVEL_ORDER.map((label) => ({
-    label,
-    miles: summary.miles_by_level[label] ?? 0,
-    color: riskByLabel(label).color,
-  })).filter((segment) => segment.miles > 0)
-
-  const riskText = segments.map((s) => `${s.label} ${formatMiles(s.miles, 0)}`).join(', ')
+  const milesAt = (label) => summary.miles_by_level[label] ?? 0
 
   return (
     <button
       type="button"
-      className={`route-card ${selected ? 'is-selected' : ''}`}
+      className={`route-card ${selected ? 'is-selected' : ''} ${hovered && !selected ? 'is-hovered' : ''}`}
+      style={{ '--i': index }}
       onClick={() => onSelect(route.id)}
+      onMouseEnter={() => onHover(route.id)}
+      onMouseLeave={() => onHover(null)}
+      onFocus={() => onHover(route.id)}
+      onBlur={() => onHover(null)}
       aria-pressed={selected}
     >
       <div className="rc-head">
@@ -36,11 +51,15 @@ export default function RouteCard({ route, selected, onSelect }) {
       <div className="rc-stats">
         <div>
           <span>Distance</span>
-          <b>{formatMiles(summary.distance_miles)}</b>
+          <b>
+            <AnimatedNumber value={summary.distance_miles} format={(v) => formatMiles(v)} />
+          </b>
         </div>
         <div>
           <span>Drive time</span>
-          <b>{formatDuration(summary.duration_minutes)}</b>
+          <b>
+            <AnimatedNumber value={summary.duration_minutes} format={formatDuration} />
+          </b>
         </div>
         <div>
           <span>Arrives</span>
@@ -48,29 +67,33 @@ export default function RouteCard({ route, selected, onSelect }) {
         </div>
       </div>
 
-      <div className="riskbar" role="img" aria-label={`Miles by risk level: ${riskText}`}>
-        {segments.map((segment) => (
-          <span
-            key={segment.label}
-            className="seg"
-            style={{ flexGrow: segment.miles, background: segment.color }}
-            title={`${segment.label}: ${formatMiles(segment.miles)}`}
-          />
-        ))}
-      </div>
+      <RiskRibbon
+        route={route}
+        maxMiles={maxMiles}
+        truckMile={truckMile}
+        onHoverPoint={onHoverPoint}
+        onShowCheckpoint={onShowCheckpoint}
+      />
 
       <div className="rc-foot">
         <span>
-          No Travel <b>{formatMiles(summary.miles_by_level['No Travel'] ?? 0, 0)}</b>
+          No Travel <b>{formatMiles(milesAt('No Travel'), 0)}</b>
         </span>
         <span>
-          Severe <b>{formatMiles(summary.miles_by_level.Severe ?? 0, 0)}</b>
+          Severe <b>{formatMiles(milesAt('Severe'), 0)}</b>
         </span>
         <span>
-          High <b>{formatMiles(summary.miles_by_level.High ?? 0, 0)}</b>
+          High <b>{formatMiles(milesAt('High'), 0)}</b>
         </span>
         <span>
-          Avg risk <b>{formatNumber(summary.average_risk, 2)}</b>
+          Avg risk{' '}
+          <b>
+            {summary.average_risk === null ? (
+              formatNumber(null)
+            ) : (
+              <AnimatedNumber value={summary.average_risk} format={(v) => formatNumber(v, 2)} />
+            )}
+          </b>
         </span>
       </div>
     </button>

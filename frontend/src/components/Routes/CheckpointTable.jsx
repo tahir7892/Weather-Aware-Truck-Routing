@@ -2,8 +2,11 @@ import { formatNumber, formatTime } from '../../utils/format'
 import { riskByLabel } from '../../utils/risk'
 import './Routes.css'
 
-/** Every checkpoint of the selected route. Clicking a row shows it on the map. */
-export default function CheckpointTable({ route, interval, onShowCheckpoint }) {
+/**
+ * Every checkpoint of the selected route. Hovering a row marks it on the map;
+ * clicking a row opens its details there.
+ */
+export default function CheckpointTable({ route, interval, onShowCheckpoint, onHoverPoint }) {
   return (
     <section className="card table-card">
       <h2 className="card-title">
@@ -27,7 +30,13 @@ export default function CheckpointTable({ route, interval, onShowCheckpoint }) {
               const risk = riskByLabel(checkpoint.risk.level)
               const { weather } = checkpoint
               return (
-                <tr key={checkpoint.index} onClick={() => onShowCheckpoint(checkpoint.index)} title={checkpoint.risk.reason}>
+                <tr
+                  key={checkpoint.index}
+                  onClick={() => onShowCheckpoint(checkpoint.index)}
+                  onMouseEnter={() => onHoverPoint({ lat: checkpoint.lat, lon: checkpoint.lon })}
+                  onMouseLeave={() => onHoverPoint(null)}
+                  title={checkpoint.risk.reason}
+                >
                   <td>
                     <button type="button" className="row-link" onClick={(event) => {
                       event.stopPropagation()

@@ -143,6 +143,15 @@ export default function CheckpointLayer({ map, trip, selectedRouteId, focus }) {
   // A new trip closes any open popup.
   useEffect(() => () => popupRef.current?.remove(), [trip])
 
+  // Esc closes the open popup.
+  useEffect(() => {
+    const onKey = (event) => {
+      if (event.key === 'Escape') popupRef.current?.remove()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [])
+
   // Row clicked in the checkpoint table.
   useEffect(() => {
     if (focus) openRef.current(focus.routeId, focus.index, { fly: true })

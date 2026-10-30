@@ -41,8 +41,24 @@ Other commands: `npm run build` (production build in `dist/`),
   in blue, others gray, each labelled with its letter and drive time;
   checkpoint dots colored by risk with a details popup (ETA, forecast hour,
   wind, gusts, rain, snow, reason); start/end markers; legend.
-- **Forecast bar** – 0–48 h slider with play/pause, heatmap on/off. The heatmap
-  and a truck icon (where the selected truck is at that hour) follow the slider.
+- **Forecast bar** – 0–48 h slider with play/pause, heatmap on/off, and a
+  **Risk / Wind / Rain / Snow** switch with a legend for each. The heatmap
+  cross-fades between hours, and a truck icon (where the selected truck is at
+  that hour) follows the slider.
+- **Risk ribbon** on each route card – risk in driving order on a shared mile
+  scale; hover a piece to see its times and reason (and a pulsing marker on the
+  map), click to open that checkpoint. A dark line shows the truck at the
+  slider's hour.
+- **Route-profile charts** – wind and rain (and snow when forecast) along the
+  selected route at the truck's arrival time, with the risk bands shaded;
+  hover to find the point on the map, click to open it.
+- **Hover sync** – hovering a card or a route line highlights that route and
+  fades the others; hovering a table row, ribbon or chart marks the spot.
+- **Example trips** – one-click examples before the first trip.
+- **Keyboard shortcuts** – Space play/pause, ← → hour, 1 2 3 select route by
+  rank, Esc close, ? help.
+- **Motion** – routes draw in, cards rise in, numbers count up; all animation
+  is turned off for users who ask their system for reduced motion.
 
 All times come from the API in UTC and are shown in the browser's time zone.
 

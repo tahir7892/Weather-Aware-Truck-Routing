@@ -84,6 +84,42 @@
   color: var(--ink-2);
 }
 
+.examples {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.example {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+  text-align: left;
+  transition: border-color 0.15s, background 0.15s, transform 0.15s;
+}
+
+.example:hover {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  transform: translateX(2px);
+}
+
+.example span {
+  color: var(--muted);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.empty-how {
+  margin-top: 4px;
+}
+
 .empty-state ul {
   margin: 0;
   padding-left: 18px;

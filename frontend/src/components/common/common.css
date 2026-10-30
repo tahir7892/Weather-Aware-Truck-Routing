@@ -74,11 +74,75 @@
   color: var(--ink-2);
 }
 
+/* Keyboard shortcuts button and panel (top bar) */
+.shortcuts {
+  position: relative;
+}
+
+.shortcuts-button {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  font-weight: 700;
+  color: var(--ink-2);
+}
+
+.shortcuts-button:hover,
+.shortcuts-button[aria-expanded='true'] {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.shortcuts-panel {
+  position: absolute;
+  top: 36px;
+  right: 0;
+  z-index: 40;
+  width: 300px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  animation: rise 0.2s ease both;
+}
+
+.shortcuts-panel dl {
+  margin: 10px 0;
+  display: grid;
+  gap: 8px;
+}
+
+.shortcuts-panel dl div {
+  display: grid;
+  grid-template-columns: 96px 1fr;
+  align-items: center;
+  gap: 8px;
+}
+
+.shortcuts-panel dt {
+  display: flex;
+  gap: 4px;
+}
+
+.shortcuts-panel dd {
+  margin: 0;
+  color: var(--ink-2);
+  font-size: 13px;
+}
+
+.shortcuts-panel small {
+  color: var(--muted);
+}
+
 /* Warnings */
 .warnings {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  animation: rise 0.45s ease 0.1s both;
 }
 
 .warning {

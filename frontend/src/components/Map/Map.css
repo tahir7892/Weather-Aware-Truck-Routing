@@ -141,6 +141,31 @@
   border-bottom: 0;
 }
 
+/* Route labels appear once the lines have drawn in. */
+.map-chip.is-route {
+  animation: fade-in 0.35s ease 0.75s both;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+/* Pulsing ring for the point under the mouse (table row, ribbon, chart). */
+.hover-marker {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 3px solid var(--accent);
+  background: rgba(42, 120, 214, 0.18);
+  pointer-events: none;
+  animation: pulse 1s ease-in-out infinite;
+}
+
+/* Uses `scale`, not `transform`: MapLibre positions markers with `transform`. */
+@keyframes pulse {
+  50% {
+    scale: 1.35;
+    opacity: 0.7;
+  }
+}
+
 .truck-marker {
   width: 30px;
   height: 30px;

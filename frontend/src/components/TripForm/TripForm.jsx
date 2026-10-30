@@ -41,14 +41,17 @@ function validate({ origin, destination, departure, load }) {
 /**
  * The "Plan a trip" card. Sends { origin, destination, departure_time,
  * load_weight_lb, checkpoint_interval_miles } to `onSubmit`.
- * `serverErrors` are field errors returned by the backend.
+ * `serverErrors` are field errors returned by the backend. `initial` (an
+ * example trip) pre-fills the fields; the parent re-creates the form for it.
  */
-export default function TripForm({ onSubmit, onEdit, loading, serverErrors }) {
-  const [origin, setOrigin] = useState(emptyPlace())
-  const [destination, setDestination] = useState(emptyPlace())
-  const [departure, setDeparture] = useState(defaultDepartureValue)
-  const [load, setLoad] = useState('45000')
-  const [interval, setIntervalMiles] = useState(25)
+export default function TripForm({ onSubmit, onEdit, loading, serverErrors, initial }) {
+  const [origin, setOrigin] = useState(() => (initial ? { text: initial.origin.name, place: initial.origin } : emptyPlace()))
+  const [destination, setDestination] = useState(() =>
+    initial ? { text: initial.destination.name, place: initial.destination } : emptyPlace(),
+  )
+  const [departure, setDeparture] = useState(() => initial?.departure ?? defaultDepartureValue())
+  const [load, setLoad] = useState(() => String(initial?.loadLb ?? 45000))
+  const [interval, setIntervalMiles] = useState(() => initial?.interval ?? 25)
   const [errors, setErrors] = useState({})
   // Date-picker limits, set when the form opens; submitting re-checks against the current time.
   const [{ minDeparture, maxDeparture }] = useState(() => {

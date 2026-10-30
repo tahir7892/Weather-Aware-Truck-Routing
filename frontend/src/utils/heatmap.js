@@ -4,6 +4,8 @@
  * smooth: no network calls and no recalculation while sliding.
  */
 
+import { conditionLevel } from './risk'
+
 const MILES_PER_DEGREE_LAT = 69.09
 
 export function prepareHeatmap(data) {
@@ -26,13 +28,19 @@ export function prepareHeatmap(data) {
     }
   })
 
+  // Every cell carries a 0-4 level for each view (risk, wind, rain, snow);
+  // -1 marks "no data" so the map leaves that cell empty.
   const frames = data.frames.map((frame) => ({
     type: 'FeatureCollection',
     features: geometries.map((geometry, i) => ({
       type: 'Feature',
       geometry,
-      // -1 marks "no data" so the map can leave that cell empty.
-      properties: { risk: frame.risk[i] ?? -1 },
+      properties: {
+        risk: frame.risk[i] ?? -1,
+        windLevel: conditionLevel('wind', frame.wind_mph[i]),
+        rainLevel: conditionLevel('rain', frame.rain_in_per_hr[i]),
+        snowLevel: conditionLevel('snow', frame.snow_in_per_hr[i]),
+      },
     })),
   }))
 
